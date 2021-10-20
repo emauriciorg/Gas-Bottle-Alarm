@@ -1,11 +1,9 @@
 #pragma once
 /*
- * File Name: main.cpp
- * Project: Bottle Bird
+ * File Name: app.h
+ * Project: Gas Bottle Alarm
  * Version: 1.0
  * Compartible Hardware: REV1.0
- * Date Created: September 23, 2021
- * Last Modified: September 23, 2021
  */
 
 // TODO: Fix settings.cpp

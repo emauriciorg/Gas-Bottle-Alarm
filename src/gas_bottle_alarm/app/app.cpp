@@ -1,11 +1,8 @@
 /*
- * Company: ANZE Suspension
- * File Name: main.cpp
- * Project: ESP32 System on Module
+ * File Name: app.cpp
+ * Project: Gas Bottle Alarm
  * Version: 1.0
  * Compartible Hardware: REV1.0
- * Date Created: September 23, 2021
- * Last Modified: September 23, 2021
  */
 
 //*****************************************************        LIBRARIES        *****************************************************/
