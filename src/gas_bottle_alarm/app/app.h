@@ -1,6 +1,5 @@
 #pragma once
 /*
- * Company: ANZE Suspension
  * File Name: main.cpp
  * Project: Bottle Bird
  * Version: 1.0
