@@ -31,7 +31,7 @@ extern RealTimeClock rtc;
 #define SETTINGS_FILE_SIZE_BYTES 3000
 #define SETTINGS_FILE "/settings.json"
 
-#define MINIMUM_BAT_VOLTAGE_FOR_BOOT_mV 3700
+#define MINIMUM_BAT_VOLTAGE_FOR_BOOT_mV 3000
 
 #define NUMPIXELS 12
 #define LED_BLINKING_PERIOD_mS 15

@@ -69,40 +69,40 @@ void BottleBirdApp::begin()
         "SLE", INFO, micros()));
 
     //* 4. Go back to sleep if voltage too low. Device will only wake up again from user button
-    // if ((battery_voltage * 1000) <= MINIMUM_BAT_VOLTAGE_FOR_BOOT_mV)
-    // {
-    //     //* 4.1 Enable LED strip
-    //     pinMode(LED_GND_ENABLE, OUTPUT);
-    //     digitalWrite(LED_GND_ENABLE, HIGH);
-    //     vTaskDelay(5 / portTICK_PERIOD_MS); // Allow some time to turn on
+    if ((battery_voltage * 1000) <= MINIMUM_BAT_VOLTAGE_FOR_BOOT_mV)
+    {
+        //* 4.1 Enable LED strip
+        pinMode(LED_GND_ENABLE, OUTPUT);
+        digitalWrite(LED_GND_ENABLE, HIGH);
+        vTaskDelay(5 / portTICK_PERIOD_MS); // Allow some time to turn on
 
-    //     //* 4.2 Begin & clear pixels
-    //     led_strip.begin();
-    //     led_strip.clear();
-    //     led_strip.show();
+        //* 4.2 Begin & clear pixels
+        led_strip.begin();
+        led_strip.clear();
+        led_strip.show();
 
-    //     //* 4.3 Display red LEDs to indicate low battery
-    //     for (int i = 0; i < NUMPIXELS; i++)
-    //     {
-    //         led_strip.setPixelColor(i, led_strip.Color(50, 0, 0)); // RGB/
-    //         led_strip.show();
-    //     }
+        //* 4.3 Display red LEDs to indicate low battery
+        for (int i = 0; i < NUMPIXELS; i++)
+        {
+            led_strip.setPixelColor(i, led_strip.Color(50, 0, 0)); // RGB/
+            led_strip.show();
+        }
 
-    //     terminal.printMessage(TerminalMessage("Battery voltage is too low, starting deep sleep",
-    //                                           "SLE", INFO, micros()));
-    //     terminal.end();
+        terminal.printMessage(TerminalMessage("Battery voltage is too low, starting deep sleep",
+                                              "SLE", INFO, micros()));
+        terminal.end();
 
-    //     vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(100 / portTICK_PERIOD_MS);
 
-    //     //* 4.4 Turn off LED strip
-    //     digitalWrite(LED_GND_ENABLE, LOW);
+        //* 4.4 Turn off LED strip
+        digitalWrite(LED_GND_ENABLE, LOW);
 
-    //     esp.uart0.println("\n\n");
-    //     esp.uart0.print("Power off");
+        esp.uart0.println("\n\n");
+        esp.uart0.print("Power off");
 
-    //     esp_sleep_enable_ext0_wakeup((gpio_num_t)USER_BUTTON_PIN, 1);
-    //     esp_deep_sleep_start();
-    // }
+        esp_sleep_enable_ext0_wakeup((gpio_num_t)USER_BUTTON_PIN, 1);
+        esp_deep_sleep_start();
+    }
 
     //* 5. If battery above threshold, get wake up source
     esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();

@@ -1,6 +1,6 @@
 #include "led_strip.h"
 
-//TODO: How to start custom blinking sessions after
+// TODO: How to start custom blinking sessions after
 void breath();
 void refreshLED(void *parameters);
 
