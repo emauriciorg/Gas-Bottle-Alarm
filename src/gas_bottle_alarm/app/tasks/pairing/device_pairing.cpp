@@ -5,8 +5,13 @@
 #include "../settings/settings.h"
 #include "../led_strip/led_strip.h"
 #include "../time_keeper/time_keeper.h"
+#include "../deep_sleep/deep_sleep.h"
 
-#define PAIRING_TIMEOUT_S 30
+#include "api.h"
+
+#define AWAIT_CMD_TIMEOUT_S 30
+
+void pairingTask();
 
 void wirelessPairingMode()
 {
@@ -32,7 +37,7 @@ void wirelessPairingMode()
         }
     }
 
-    //* 3. Create tasks if RTOS was setup correctly
+    //* 3. Create tasks needed by this process if RTOS was setup correctly
     xTaskCreatePinnedToCore(setupTerminal,
                             "Terminal Setup",
                             10000,
@@ -65,110 +70,144 @@ void wirelessPairingMode()
                             NULL,
                             1);
 
-    // xTaskCreatePinnedToCore(setupDeepSleepManager,
-    //                         "Deep Sleep Setup",
-    //                         10000,
-    //                         NULL,
-    //                         24,
-    //                         NULL,
-    //                         1);
-
-    // xTaskCreatePinnedToCore(setupSPIFFS,
-    //                         "Deep Sleep Setup",
-    //                         30000,
-    //                         NULL,
-    //                         23,
-    //                         NULL,
-    //                         0);
-
-    // xTaskCreatePinnedToCore(pairingTask,
-    //                         "Pairing Task",
-    //                         10000,
-    //                         NULL,
-    //                         22,
-    //                         NULL,
-    //                         0);
-
-    // xTaskCreatePinnedToCore(startMainApp,
-    //                         "Main app",
-    //                         10000,
-    //                         NULL,
-    //                         21,
-    //                         NULL,
-    //                         1);
-
-    //* 2. Start the bluetooth server task
-    xSemaphoreGive(app.rtos.start_ble_server);
+    pairingTask();
 
     vTaskDelete(NULL);
 }
 
-// void pairingTask(void *parameters)
-// {
-//     TerminalMessage pairing_debug_message;
-//     uint8_t debug_message_queue_ticks = 0;
+void pairingTask()
+{
+    //* 1. Start the bluetooth server task
+    xSemaphoreGive(app.rtos.start_ble_server);
 
-//     //* 1. Await binary semaphore
-//     xSemaphoreTake(app.rtos.start_pairing, portMAX_DELAY);
+    String incoming_command = "";
+    long initial_time;
 
-//     pairing_debug_message = TerminalMessage("Starting pair up process", "PAI", INFO, micros());
-//     addDebugMessageToQueue(&pairing_debug_message, debug_message_queue_ticks);
+    TerminalMessage pairing_debug_message;
 
-//     //* 2. Start the bluetooth server task
-//     xSemaphoreGive(app.rtos.start_ble_server);
+    long last_command_time = millis();
+    bool settings_changed = false;
 
-//     //* 3. Create a task that awaits an instruction. If it never get's it, the sleep timer will
-//     //*    expire & the device will go back to sleep
+    while (millis() - last_command_time < AWAIT_CMD_TIMEOUT_S * 1000)
+    {
+        vTaskDelay(10);
+        //* 1. Await bluetooth terminal
+        if (xQueueReceive(app.rtos.ble_rx_message_queue, (void *)&incoming_command, 0) == pdTRUE)
+        {
+            TerminalMessage debug_message;
+            String instruction = incoming_command;
 
-//     TerminalMessage debug_message;
-//     String incoming_instruction;
+            //* Check If command is pairing
+            if (instruction == API.PAIRING_RQT_CMD)
+            {
+                initial_time = micros();
 
-//     while (1)
-//     {
-//         //* 1. Await initial pairing request
-//         if (xQueueReceive(app.rtos.ble_rx_message_queue, (void *)&incoming_instruction, portMAX_DELAY) == pdTRUE)
-//         {
-//             String temp = incoming_instruction;
+                pairing_debug_message = TerminalMessage("Pairing started", "PAI", INFO, micros());
+                addDebugMessageToQueue(&pairing_debug_message);
 
-//             if (temp == "PAIRING")
-//             {
-//                 debug_message = TerminalMessage("Pairing started",
-//                                                 "PAI", INFO, micros());
+                //* 1.1 Respond to mobile phone after 200ms.
+                vTaskDelay(200 / portTICK_PERIOD_MS);
+                addBluetoothTXMessageToQueue(&API.PAIRING_ACK_CMD);
 
-//                 bool initial_pairing_time = millis();
+                //* 1.2 Set LEDs to green & sounds buzzer for connected
 
-//                 device_settings.device_is_setup = true;
+                //* 1.3 Await for any incoming commands. Timeout is handled by BLE server
+                last_command_time = millis(); // Reset timeout
 
-//                 ESP_ERROR save_settings_on_setup = saveSettings();
+                while (millis() - last_command_time < AWAIT_CMD_TIMEOUT_S * 1000)
+                {
+                    vTaskDelay(10);
 
-//                 TerminalMessage setup_debug_message;
+                    if (xQueueReceive(app.rtos.ble_rx_message_queue, (void *)&incoming_command, 0) == pdTRUE)
+                    {
+                        //* 1.3.1 Decode Instruction
+                        bool decode = API.decodeCommand(incoming_command);
 
-//                 if (save_settings_on_setup.on_error)
-//                 {
-//                     setup_debug_message = TerminalMessage(save_settings_on_setup.debug_message,
-//                                                           "PAI", ERROR, micros(), micros() - initial_pairing_time);
-//                 }
-//                 else
-//                 {
-//                     setup_debug_message = TerminalMessage("Device was setup correctly",
-//                                                           "PAI", INFO, micros(), micros() - initial_pairing_time);
-//                 }
+                        if (decode)
+                        {
+                            settings_changed = true;
+                            pairing_debug_message = TerminalMessage("Command decoded: " + incoming_command, "PAI", INFO, micros());
+                            addDebugMessageToQueue(&pairing_debug_message);
+                        }
+                        else
+                        {
+                            pairing_debug_message = TerminalMessage("Data is not an API command", "PAI", INFO, micros());
+                            addDebugMessageToQueue(&pairing_debug_message);
 
-//                 addDebugMessageToQueue(&setup_debug_message);
+                            addBluetoothTXMessageToQueue(&API.NOT_VALID_CMD);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                debug_message = TerminalMessage("Not pairing commmand",
+                                                "PAI", WARNING, micros());
+                addDebugMessageToQueue(&debug_message);
+            }
+        }
+    }
 
-//                 //* Start main
-//                 xSemaphoreGive(app.rtos.start_main); // * Start Main App if paired
-//                 vTaskDelete(NULL);
-//             }
-//             else
-//             {
-//                 debug_message = TerminalMessage("Not pairing commmand",
-//                                                 "PAI", WARNING, micros());
-//             }
+    //* If no command sent before timeout
+    TerminalMessage timeout_message = TerminalMessage("No command timeout. Checking for changes...",
+                                                      "PAI", WARNING, micros());
 
-//             addDebugMessageToQueue(&debug_message);
-//         }
-//     }
+    addDebugMessageToQueue(&timeout_message);
 
-//     vTaskDelete(NULL);
-// }
+    //* Save settings in timeout or disconnect
+    if (settings_changed)
+    {
+        TerminalMessage start_save_message = TerminalMessage("Changes detected. Saving settings file to memory",
+                                                             "PAI", WARNING, micros());
+
+        addDebugMessageToQueue(&start_save_message);
+
+        //* 1.3.2 Check if memory is initialized
+        initial_time = micros();
+        if (!spiffsMemory.isInitialized())
+        {
+            ESP_ERROR initialize_spiffs = spiffsMemory.begin();
+
+            if (initialize_spiffs.on_error)
+            {
+                pairing_debug_message = TerminalMessage(initialize_spiffs.debug_message,
+                                                        "PAI", ERROR, micros(), micros() - initial_time);
+
+                addBluetoothTXMessageToQueue(&API.SPIFFS_ERR);
+            }
+        }
+
+        //* 1.3.3 Save settings file to SPIFFS
+        initial_time = micros();
+        ESP_ERROR save_settings = saveSettings();
+
+        if (save_settings.on_error)
+        {
+            pairing_debug_message = TerminalMessage(save_settings.debug_message,
+                                                    "PAI", ERROR, micros(), micros() - initial_time);
+
+            addBluetoothTXMessageToQueue(&API.SPIFFS_ERR);
+        }
+
+        else
+        {
+            pairing_debug_message = TerminalMessage("Settings saved correctly",
+                                                    "PAI", INFO, micros(), micros() - initial_time);
+        }
+    }
+    else
+    {
+        pairing_debug_message = TerminalMessage("No settings were changed",
+                                                "PAI", INFO, micros());
+    }
+
+    addDebugMessageToQueue(&pairing_debug_message);
+
+    vTaskDelay(10 / portTICK_PERIOD_MS); // Await terminal to flush
+
+    terminal.end();
+
+    startDeepSleep();
+
+    vTaskDelete(NULL);
+}

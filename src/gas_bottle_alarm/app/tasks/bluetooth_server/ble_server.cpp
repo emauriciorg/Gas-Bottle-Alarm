@@ -2,7 +2,7 @@
 #include "../terminal/terminal.h"
 #include "../deep_sleep/deep_sleep.h"
 
-#define BLE_ADVERTISING_TIMEOUT_S 15
+#define BLE_ADVERTISING_TIMEOUT_S 30
 
 // BLE Service Characteristics
 #define BLE_NAME "Bottle bird"
@@ -72,6 +72,9 @@ class MyServerCallbacks : public BLEServerCallbacks
 // * Characteristic Call Backs
 class MyCallbacks : public BLECharacteristicCallbacks
 {
+    TerminalMessage ble_rx_message;
+    String instruction = "";
+
     void onWrite(BLECharacteristic *pCharacteristic)
     {
         std::string rxValue = pCharacteristic->getValue();
@@ -80,9 +83,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
         incoming_bluetooth_message += rxValue.length();
         incoming_bluetooth_message += ") ->\t";
 
-        TerminalMessage ble_rx_message;
-
-        String instruction;
+        instruction = "";
 
         // Store incoming message in string
         if (rxValue.length() > 0)
@@ -129,31 +130,32 @@ void bleServerTask(void *parameters)
                     &CharacteristicCallbacks);
 
     // * 3. Set MTU size
+    TerminalMessage mtu_size_message;
     initial_time = micros();
     ESP_ERROR mtu_set = bleServer.setMaxMTUsize(185); // -- Try to negotiate Max size MTU (iOS max. MTU is 185 bytes)
 
     if (mtu_set.on_error) // Catch error
     {
-        ble_debug_message = TerminalMessage(mtu_set.debug_message,
-                                            "BLE", WARNING, micros(), micros() - initial_time);
+        mtu_size_message = TerminalMessage(mtu_set.debug_message,
+                                           "BLE", WARNING, micros(), micros() - initial_time);
     }
     else
     {
-        ble_debug_message = TerminalMessage("MTU size set to 185 bytes. Max throughput is ~ 11KB/s",
-                                            "BLE", INFO, micros(), micros() - initial_time);
+        mtu_size_message = TerminalMessage("MTU size set to 185 bytes. Max throughput is ~ 11KB/s",
+                                           "BLE", INFO, micros(), micros() - initial_time);
     }
 
-    addDebugMessageToQueue(&ble_debug_message, debug_message_queue_ticks);
+    addDebugMessageToQueue(&mtu_size_message, debug_message_queue_ticks);
 
     // * 4. Start Advertising
     initial_time = micros();
     bleServer.startAdvertising();
     vTaskDelay(2 / portTICK_PERIOD_MS);
 
-    ble_debug_message = TerminalMessage("Server is advertising. Waiting for client connection to notify",
-                                        "BLE", INFO, micros(), micros() - initial_time);
+    TerminalMessage ble_advertising_message = TerminalMessage("Server is advertising. Waiting for client connection to notify",
+                                                              "BLE", INFO, micros(), micros() - initial_time);
 
-    addDebugMessageToQueue(&ble_debug_message, debug_message_queue_ticks);
+    addDebugMessageToQueue(&ble_advertising_message, debug_message_queue_ticks);
 
     // * Create server tasks
     xTaskCreatePinnedToCore(bleTransmitTask,
@@ -182,7 +184,7 @@ void addBluetoothTXMessageToQueue(String *bluetooth_message, uint16_t port_ticks
     xSemaphoreGive(app.rtos.ble_tx_message_queue_mutex);
 }
 
-void addBluetoothRXMessageToQueue(String *bluetooth_message, uint16_t port_ticks)
+void addBluetoothRXMessageToQueue(String *bluetooth_message, uint16_t port_ticks = 0)
 {
     xSemaphoreTake(app.rtos.ble_rx_message_queue_mutex, port_ticks);
     xQueueSend(app.rtos.ble_rx_message_queue, (void *)bluetooth_message, 0);

@@ -15,6 +15,9 @@ ESP_ERROR readSettingsFile();
 ESP_ERROR saveSettings();
 ESP_ERROR calibrateADC();
 
+ESP_ERROR saveSettingsToMemory()
+{
+}
 ESP_ERROR getSettingsFromMemory()
 {
     ESP_ERROR err;

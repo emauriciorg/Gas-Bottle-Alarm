@@ -41,6 +41,7 @@ public:
     DeviceSettings()
     {
         settings_read = false;
+        device_is_setup = false;
         unit_mac_address = WiFi.macAddress().c_str();
     }
 
