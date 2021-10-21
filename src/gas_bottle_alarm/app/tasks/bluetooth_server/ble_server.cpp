@@ -1,7 +1,16 @@
 #include "ble_server.h"
 #include "../terminal/terminal.h"
+#include "../deep_sleep/deep_sleep.h"
+
+#define BLE_ADVERTISING_TIMEOUT_S 15
+
+// BLE Service Characteristics
+#define BLE_NAME "Bottle bird"
+#define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
+#define CHARACTERISTIC_UUID "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 
 void addBluetoothRXMessageToQueue(String *bluetooth_message, uint16_t port_ticks);
+void bleAdvertisingTimeout(void *parameters);
 void bleTransmitTask(void *parameters);
 
 // * Server Call Backs
@@ -14,6 +23,9 @@ class MyServerCallbacks : public BLEServerCallbacks
     // -- On client connect
     void onConnect(BLEServer *pServer)
     {
+        //* 1. Delete timeout task
+        vTaskDelete(app.rtos.ble_advertising_timeout_handle);
+
         bleServer.onClientConnect();
 
         ble_server_debug_message = TerminalMessage("Client connected", // TerminalMessage body
@@ -23,13 +35,13 @@ class MyServerCallbacks : public BLEServerCallbacks
 
         addDebugMessageToQueue(&ble_server_debug_message);
 
-        //TODO: Handle TX functionality here
-        // xTaskCreate(bleTransmitTask,
-        //             "Bluetooth TX task",
-        //             10000,
-        //             NULL,
-        //             2,
-        //             NULL);
+        // TODO: Handle TX functionality here
+        //  xTaskCreate(bleTransmitTask,
+        //              "Bluetooth TX task",
+        //              10000,
+        //              NULL,
+        //              2,
+        //              NULL);
     };
 
     // -- On client disconnect
@@ -44,8 +56,16 @@ class MyServerCallbacks : public BLEServerCallbacks
 
         addDebugMessageToQueue(&ble_server_debug_message);
 
-        //TODO: Add OTA functionality here
+        // TODO: Add OTA functionality here
         bleServer.startAdvertising();
+
+        xTaskCreatePinnedToCore(bleAdvertisingTimeout,
+                                "BLE timeout",
+                                3000,
+                                NULL,
+                                25,
+                                &app.rtos.ble_advertising_timeout_handle,
+                                0);
     }
 } ServerCallbacks;
 
@@ -95,9 +115,16 @@ void bleServerTask(void *parameters)
     addDebugMessageToQueue(&ble_debug_message, debug_message_queue_ticks);
 
     //* 2. Begin Service
-    bleServer.begin("Bottle bird",
-                    app.device_settings.ble_service_uuid,
-                    app.device_settings.ble_characteristic_uuid,
+    // TODO: FFS settings not working
+    // bleServer.begin("Bottle bird",
+    //                 app.device_settings.ble_service_uuid,
+    //                 app.device_settings.ble_characteristic_uuid,
+    //                 &ServerCallbacks,
+    //                 &CharacteristicCallbacks);
+
+    bleServer.begin(BLE_NAME,
+                    SERVICE_UUID,
+                    CHARACTERISTIC_UUID,
                     &ServerCallbacks,
                     &CharacteristicCallbacks);
 
@@ -129,13 +156,20 @@ void bleServerTask(void *parameters)
     addDebugMessageToQueue(&ble_debug_message, debug_message_queue_ticks);
 
     // * Create server tasks
-
     xTaskCreatePinnedToCore(bleTransmitTask,
                             "BLE TX Task",
                             10000,
                             NULL,
                             22,
                             NULL,
+                            0);
+
+    xTaskCreatePinnedToCore(bleAdvertisingTimeout,
+                            "BLE timeout",
+                            3000,
+                            NULL,
+                            25,
+                            &app.rtos.ble_advertising_timeout_handle,
                             0);
 
     vTaskDelete(NULL); // Delete Task
@@ -155,6 +189,25 @@ void addBluetoothRXMessageToQueue(String *bluetooth_message, uint16_t port_ticks
     xSemaphoreGive(app.rtos.ble_rx_message_queue_mutex);
 }
 
+void bleAdvertisingTimeout(void *parameters)
+{
+    while (1)
+    {
+        //* 1. Delay for certain time
+        vTaskDelay((BLE_ADVERTISING_TIMEOUT_S * 1000) / portTICK_PERIOD_MS);
+
+        //* 2. Start deep sleep if timeout
+        terminal.printMessage(TerminalMessage("Bluetooth advertising timeout",
+                                              "SLE", INFO, micros()));
+        terminal.end();
+
+        esp.uart0.println("\n\n");
+        esp.uart0.print("Power off");
+
+        startDeepSleep();
+    }
+}
+
 void bleTransmitTask(void *parameters)
 {
     long initial_time = micros(); // Track process time
@@ -166,7 +219,7 @@ void bleTransmitTask(void *parameters)
 
     String ble_tx_message;
 
-    ble_tx_task_debug_message = TerminalMessage("Bluetooth Low Energy TX active",                //Mesage
+    ble_tx_task_debug_message = TerminalMessage("Bluetooth Low Energy TX active",                // Mesage
                                                 "BLE", INFO, micros(), micros() - initial_time); // System, message type, timestamp, process time
 
     addDebugMessageToQueue(&ble_tx_task_debug_message, serial_message_port_ticks); // -- Add message to terminal queue

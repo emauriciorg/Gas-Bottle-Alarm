@@ -3,7 +3,7 @@
 #include "gas_bottle_alarm/app/app.h"
 
 //*
-//* Wireless Pairing Mode
+//* Wireless Control Mode
 //*
 //* Description: During this mode the unit will begin the bluetooth server, and wait for a connection
 //*              from the user. If no connection is stablished before the timeout, the device will
@@ -16,4 +16,4 @@
 //*              sleep mode again, and the bluetooth connection will be terminated.
 //*
 
-void wirelessPairingMode();
+void wirelessControlMode();

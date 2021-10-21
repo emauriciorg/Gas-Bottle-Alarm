@@ -2,4 +2,4 @@
 
 #include "gas_bottle_alarm/app/app.h"
 
-void startMainApp(void *parameters);
+ESP_ERROR updateFirebase();

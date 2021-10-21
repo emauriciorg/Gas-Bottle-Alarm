@@ -6,7 +6,14 @@
  * Compartible Hardware: REV1.0
  */
 
-// TODO: Fix settings.cpp
+#define SETTINGS_FILE_SIZE_BYTES 3000
+#define SETTINGS_FILE "/settings.json"
+
+#define MINIMUM_BAT_VOLTAGE_FOR_BOOT_mV 3000
+
+#define NUMPIXELS 12
+#define LED_BLINKING_PERIOD_mS 15
+
 //*********************************************************     READ ME    **********************************************************/
 
 //*****************************************************        LIBRARIES        *****************************************************/
@@ -28,24 +35,24 @@ extern RealTimeClock rtc;
 
 //*****************************************************       DATA TYPES        *****************************************************/
 
-#define SETTINGS_FILE_SIZE_BYTES 3000
-#define SETTINGS_FILE "/settings.json"
-
-#define MINIMUM_BAT_VOLTAGE_FOR_BOOT_mV 3000
-
-#define NUMPIXELS 12
-#define LED_BLINKING_PERIOD_mS 15
-
 class DeviceSettings
 {
 public:
     DeviceSettings()
     {
         settings_read = false;
+        unit_mac_address = WiFi.macAddress().c_str();
     }
 
-    bool settings_read;
+    //* Database fields
+    String unit_mac_address;
+    bool bottle_is_open;
+    int number_of_times_opened;
+    DateTime opened_bottle_time;
+    DateTime closed_bottle_time;
 
+    //* Software device config fields
+    bool settings_read;
     bool first_boot;
     bool device_is_setup;
     const char *wifi_ssid;
@@ -53,10 +60,11 @@ public:
     const char *ble_service_uuid;
     const char *ble_characteristic_uuid;
 
-    ESP_ERROR fromJSON(JsonDocument &settings_json)
+    //* Functions
+    ESP_ERROR
+    fromJSON(JsonDocument &settings_json)
     {
         ESP_ERROR err;
-        err.on_error = false;
 
         // https://arduinojson.org/v6/assistant/
 
@@ -74,7 +82,6 @@ public:
     ESP_ERROR toJSON(JsonDocument &settings_json)
     {
         ESP_ERROR err;
-        err.on_error = false;
 
         settings_json["first_boot"] = first_boot;
         settings_json["device_setup"] = device_is_setup;
@@ -88,6 +95,8 @@ public:
 
 private:
 };
+
+extern RTC_DATA_ATTR DeviceSettings device_settings;
 
 //**************************************************        RTOS VARIABLES        ***************************************************/
 class ApplicationRTOS_Objects
@@ -107,6 +116,7 @@ public:
     uint16_t file_print_queue_length = 5;
 
     // * Bluetooth
+    TaskHandle_t ble_advertising_timeout_handle;
     SemaphoreHandle_t start_ble_server = NULL;
     SemaphoreHandle_t handle_ble_instruction = NULL;
 
@@ -128,8 +138,6 @@ class BottleBirdApp
 
 public:
     DateTime system_time;
-    DeviceSettings device_settings;
-
     ApplicationRTOS_Objects rtos;
     ESP_ERROR setupRTOS(); // Defined in "tasks/rtos.h"
 

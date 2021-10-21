@@ -40,9 +40,9 @@ ESP_ERROR getSettingsFromMemory()
     }
 
     // * 3. Figure out if it's the first boot
-    if (app.device_settings.first_boot)
+    if (device_settings.first_boot)
     {
-        app.device_settings.first_boot = false;
+        device_settings.first_boot = false;
 
         ESP_ERROR write_file_on_first_boot = saveSettings();
 
@@ -90,7 +90,7 @@ ESP_ERROR readSettingsFile()
     }
 
     // * Read settings from settings file
-    ESP_ERROR settings_correct = app.device_settings.fromJSON(settings_json_file);
+    ESP_ERROR settings_correct = device_settings.fromJSON(settings_json_file);
 
     if (settings_correct.on_error)
     {
@@ -108,7 +108,7 @@ ESP_ERROR saveSettings()
 
     StaticJsonDocument<SETTINGS_FILE_SIZE_BYTES> new_settings_json;
 
-    ESP_ERROR get_settings_string = app.device_settings.toJSON(new_settings_json);
+    ESP_ERROR get_settings_string = device_settings.toJSON(new_settings_json);
 
     if (get_settings_string.on_error)
     {
