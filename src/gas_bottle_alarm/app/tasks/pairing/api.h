@@ -21,8 +21,21 @@ public:
     bool decodeCommand(String command)
     {
         //* TODO: All the following need to be true for the device to activate
-        if (command.equals(PAIRING_RQT_CMD))
-            return true;
+        String command_type = command.substring(0, 3);
+
+        if (command_type.equals("NET"))
+        {
+            String network_command_type = command.substring(4, 7);
+
+            if (network_command_type.equals("NAME"))
+            {
+            }
+
+            if (network_command_type.equals("PASS"))
+            {
+            }
+        }
+        return true;
 
         return false;
     }

@@ -9,7 +9,7 @@
 
 #include "api.h"
 
-#define AWAIT_CMD_TIMEOUT_S 30
+#define AWAIT_CMD_TIMEOUT_S 40
 
 void pairingTask();
 
@@ -56,7 +56,7 @@ void wirelessPairingMode()
 
     xTaskCreatePinnedToCore(setupLED_Strip,
                             "LED Setup",
-                            1000,
+                            10000,
                             NULL,
                             25,
                             NULL,

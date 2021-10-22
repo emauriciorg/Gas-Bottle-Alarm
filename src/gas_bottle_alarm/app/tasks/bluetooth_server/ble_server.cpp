@@ -1,6 +1,7 @@
 #include "ble_server.h"
 #include "../terminal/terminal.h"
 #include "../deep_sleep/deep_sleep.h"
+#include "../led_strip/led_strip.h"
 
 #define BLE_ADVERTISING_TIMEOUT_S 30
 
@@ -34,6 +35,8 @@ class MyServerCallbacks : public BLEServerCallbacks
                                                    micros());          // Timestamp
 
         addDebugMessageToQueue(&ble_server_debug_message);
+
+        setColor("green");
 
         // TODO: Handle TX functionality here
         //  xTaskCreate(bleTransmitTask,
