@@ -9,7 +9,7 @@
 
 #include "api.h"
 
-#define AWAIT_CMD_TIMEOUT_S 40
+#define AWAIT_CMD_TIMEOUT_S 120
 
 void pairingTask();
 

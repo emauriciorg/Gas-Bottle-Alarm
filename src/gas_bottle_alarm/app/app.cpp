@@ -42,7 +42,7 @@ void monitorBottlePosition();
 
 void BottleBirdApp::begin()
 {
-    //* 1. Set CPU frequency to 10 Mhz
+    //* 1. Set CPU frequency to 80 Mhz
     setCpuFrequencyMhz(80);
 
     //* 2. Begin UART port for debug output

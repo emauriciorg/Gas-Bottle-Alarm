@@ -6,8 +6,11 @@
 
 #include "../terminal/terminal.h"
 
-#define WIFI_SSID "FBISurveillanceVan"
-#define WIFI_PASSWORD "500Bucks"
+// #define WIFI_SSID "FBISurveillanceVan"
+// #define WIFI_PASSWORD "500Bucks"
+
+#define WIFI_SSID "ANZE Suspension"
+#define WIFI_PASSWORD "ANZE109511"
 
 #define WIFI_CONNECTION_ATTEMPT_TIMEOUT_S 10
 
