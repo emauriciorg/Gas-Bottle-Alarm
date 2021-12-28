@@ -13,7 +13,7 @@ void setupTimeKeeper(void *parameters)
 
     //* 1. Init I2C bus & rtc chip
     esp.i2c0.begin(I2C0_SDA_PIN, I2C0_SCL_PIN, I2C0_FREQUENCY);
-    ESP_ERROR initialize_rtc = rtc.begin(RealTimeClock::RV8803_IC, &esp.i2c0);
+    ESP_ERROR initialize_rtc = rtc.begin(RealTimeClock::RV8803_IC, esp.i2c0);
 
     if (initialize_rtc.on_error)
     {
@@ -40,7 +40,7 @@ void setupTimeKeeper(void *parameters)
     //* 3. Create millisecond interrupt to increase system counter
     esp.timer0.setup();
     esp.timer0.attachInterrupt(updateTime);
-    esp.timer0.timerPeriod(1);
+    esp.timer0.timerPeriodMilliseconds(1000);
     esp.timer0.enableInterrupt();
 
     vTaskDelete(NULL);

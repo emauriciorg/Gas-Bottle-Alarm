@@ -48,7 +48,7 @@ void BottleBirdApp::begin()
     //* 2. Begin UART port for debug output
     esp.uart0.begin(UART0_BAUD_RATE);
     esp.uart0.println();
-    terminal.begin(&esp.uart0);
+    terminal.begin(esp.uart0);
 
     //* 3. Measure if battery voltage is above threshold
     monitorBattery();
