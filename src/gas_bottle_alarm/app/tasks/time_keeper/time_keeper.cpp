@@ -40,7 +40,7 @@ void setupTimeKeeper(void *parameters)
     //* 3. Create millisecond interrupt to increase system counter
     esp.timer0.setup();
     esp.timer0.attachInterrupt(updateTime);
-    esp.timer0.timerPeriodMilliseconds(1000);
+    esp.timer0.timerPeriodMilliseconds(1);
     esp.timer0.enableInterrupt();
 
     vTaskDelete(NULL);
