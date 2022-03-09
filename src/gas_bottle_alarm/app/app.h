@@ -19,7 +19,7 @@
 //*****************************************************        LIBRARIES        *****************************************************/
 #include <Arduino.h>
 #include <esp32_utilities.h>
-
+#include <WiFi.h>
 #include "../device/soc_settings.h"
 #include "../device/soc_pinout.h"
 
