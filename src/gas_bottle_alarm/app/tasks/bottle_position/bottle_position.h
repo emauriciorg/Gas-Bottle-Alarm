@@ -25,10 +25,10 @@ class Bottle_position {
 	//setters
 		uint8_t set_angle(axis_t *axis);
 
-    //thread 
+    //thread : friend class from esp32
 		void thread(void);
 
-	//drivers : class friend
+	//drivers : friend, inheretance? class from driver
 		void driver(void);
 
 };
