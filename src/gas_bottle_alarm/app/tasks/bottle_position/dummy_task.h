@@ -1,41 +1,26 @@
-#ifndef __BOTTLE_POSITION_H__
-#define __BOTTLE_POSITION_H__
-
+#ifndef __DUMMY_TASK_H__
+#define __DUMMY_TASK_H__
 
 #include <stdint.h>
-#include <Adafruit_LIS3DH.h>
 #include <stdbool.h>
 
 
 
-
-typedef struct task_bottle_args_st {
-	char axis;
-	int angle;
-	char axis_to_monitor;
-	int  angle_to_trigger;
-    int  angle_tolerance; 
-}bottle_arg_t;
-
-
-
-class Bottle_position: public Adafruit_LIS3DH {
+class Dummy_task_app {
 	
 	//drivers 
-	Adafruit_LIS3DH accelerometer;
-
+	
 	//args
 	
 	void *task_args;
-	bottle_arg_t args;
 	//events
 		int  *events_out;
 		int  *events_input;
 
 	
 	public :
-		Bottle_position(char axis, int angle, int tolerance);//, event_group_t
-		Bottle_position(void);
+		Dummy_task_app(char axis, int angle, int tolerance);//, event_group_t
+		Dummy_task_app(void);
 
 	//getters
 		uint8_t get_angle(char axis);
@@ -57,5 +42,4 @@ class Bottle_position: public Adafruit_LIS3DH {
 	
 };
 
-
-#endif /*__BOTTLE_POSITION_H__*/
+#endif /*__DUMMY_TASK_H__*/
