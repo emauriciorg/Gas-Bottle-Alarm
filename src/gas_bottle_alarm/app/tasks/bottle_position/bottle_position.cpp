@@ -1,6 +1,6 @@
 /**
  * @file bottle_position.cpp
- * @author your name (you@domain.com)
+ * @author Mauro Rios (emauriciorg@gmail.com)
  * @brief 
  * @version 0.1
  * @date 2022-04-19
@@ -18,15 +18,14 @@
 #include "app_events.h"
 
 #define APP_TASK_NAME "bottle_position"
-
-
 static const char* LOG_TAG = APP_TASK_NAME;
 
-//uint8_t bottle_state_msg[][] = {"ON","OFF"}
 
 Bottle_position::Bottle_position(void) {
 
 }
+
+
 Bottle_position::Bottle_position(char axis, int angle, int tolerance) {
 		args.axis_to_monitor  = axis;
 		args.angle_to_trigger = angle;
@@ -41,12 +40,13 @@ void Bottle_position::start_task(void *task_data){
 							this,
 							22,
 							NULL,
-						   (0));
+						   xPortGetCoreID());
 }
 
+//TODO : call the system class esp
+// esp.i2c0.begin(21, 22);
+
 void Bottle_position::begin(void) {
-	//TODO : call the system class esp
-	// esp.i2c0.begin(21, 22);
 	accelerometer = Adafruit_LIS3DH();
    if (!accelerometer.begin(0x18))
 	{
@@ -66,10 +66,9 @@ void Bottle_position::soft_thread(void *ptask_instance) {
 	sensors_event_t sensor_event;
 	app_events_t events;
 	
-
 	bottle->begin();
 
-	while (1){
+	while (1) {
 		if (xQueueReceive(msg_queue, (void *)&events, 0) == pdTRUE) {
 			printf("led delay %d\r\n",events.soft_delay);
 		}
@@ -83,6 +82,7 @@ void Bottle_position::soft_thread(void *ptask_instance) {
 
 		if (sensor_event.acceleration.z > bottle->args.angle_to_trigger) {
 			printf("Angle got triggered \r\n");
+			//send signal to the app rule
 		}
 	}	
 

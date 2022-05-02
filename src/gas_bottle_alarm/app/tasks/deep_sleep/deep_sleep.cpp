@@ -17,7 +17,7 @@ void startDeepSleep()
 
     //* TODO: 5. Setup hardware for deep sleep
 
-    esp.uart0.println("\n\n");
-    esp.uart0.print("Power off");
+//    esp.uart0.println("\n\n");
+//    esp.uart0.print("Power off");
     esp_deep_sleep_start();
 }

@@ -1,30 +1,35 @@
-#ifndef __DUMMY_TASK_H__
-#define __DUMMY_TASK_H__
+#ifndef __SOC_TASK_H__
+#define __SOC_TASK_H__
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <esp32_utilities.h>
+#include <HardwareSerial.h>
 
 
-
-class Dummy_task_app {
+class Soc_task{
 	
 	private:
 	//drivers 
-			
+		SystemOnChip esp;
+	public:
+		HardwareSerial &get_serial_driver(void);
+
 	//args
 		void *task_args;
+		
 	//events
 		int  *events_out;
 		int  *events_input;
 
 	
 	public :
-		Dummy_task_app(void);
+		Soc_task(void);
 
 	//getters
 		uint8_t get_args(void *args);
 		void get_driver_event(void);
-
+		
 	//setters
 		uint8_t set_args(void *args);
 
@@ -39,4 +44,4 @@ class Dummy_task_app {
 	
 };
 
-#endif /*__DUMMY_TASK_H__*/
+#endif /*__Soc_task_H__*/

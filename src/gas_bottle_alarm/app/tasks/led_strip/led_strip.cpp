@@ -36,12 +36,16 @@ void setupLED_Strip(void *parameters)
     vTaskDelete(NULL);
 }
 
+
+
+
 void refreshLED(void *parameters)
 {
     bool breath_in = true;
     while (1)
     {
-        for (int i = 0; i < NUMPIXELS; i++)
+
+        for (int i = 0; i < 5; i++)
         {
             if (color == "white")
             {

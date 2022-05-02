@@ -206,8 +206,8 @@ void bleAdvertisingTimeout(void *parameters)
                                               "SLE", INFO, micros()));
         terminal.end();
 
-        esp.uart0.println("\n\n");
-        esp.uart0.print("Power off");
+        //esp.uart0.println("\n\n");
+        //esp.uart0.print("Power off");
 
         startDeepSleep();
     }

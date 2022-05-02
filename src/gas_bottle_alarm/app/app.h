@@ -11,7 +11,7 @@
 
 #define MINIMUM_BAT_VOLTAGE_FOR_BOOT_mV 3000
 
-#define NUMPIXELS 12
+//#define NUMPIXELS 12
 #define LED_BLINKING_PERIOD_mS 15
 
 //*********************************************************     READ ME    **********************************************************/
