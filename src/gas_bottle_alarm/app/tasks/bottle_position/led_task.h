@@ -4,7 +4,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <Adafruit_NeoPixel.h>
+
+// #include "../../../device/soc_settings.h"
+#include "../../../device/soc_pinout.h"
+
 #define NUMPIXELS 12
+#define LED_BLINKING_PERIOD_mS 15
+#define LED_GND_ENABLE 13
 
 
 typedef struct led_color_st{
@@ -15,9 +22,11 @@ typedef struct led_color_st{
 
 
 class Leds_task{
-	
+
 	private:
 	//drivers 
+	
+
 		led_color_t led_table[NUMPIXELS];
 	//args
 		void *task_args;
@@ -27,6 +36,7 @@ class Leds_task{
 
 	
 	public :
+		Adafruit_NeoPixel led_strip;
 		Leds_task(void);
 
 	//getters

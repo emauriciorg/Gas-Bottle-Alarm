@@ -3,7 +3,7 @@
 #include "../terminal/terminal.h"
 #include "../bluetooth_server/ble_server.h"
 #include "../settings/settings.h"
-#include "../led_strip/led_strip.h"
+//#include "../led_strip/led_strip.h"
 #include "../time_keeper/time_keeper.h"
 #include "../deep_sleep/deep_sleep.h"
 
@@ -54,13 +54,13 @@ void wirelessPairingMode()
                             NULL,
                             0);
 
-    xTaskCreatePinnedToCore(setupLED_Strip,
-                            "LED Setup",
-                            10000,
-                            NULL,
-                            25,
-                            NULL,
-                            1);
+    // xTaskCreatePinnedToCore(setupLED_Strip,
+    //                         "LED Setup",
+    //                         10000,
+    //                         NULL,
+    //                         25,
+    //                         NULL,
+    //                         1);
 
     xTaskCreatePinnedToCore(setupTimeKeeper,
                             "Time Keeper",

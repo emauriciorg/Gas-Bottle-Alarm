@@ -13,7 +13,7 @@
 #include "tasks/pairing/device_pairing.h"
 #include "tasks/wireless_control/wireless_control.h"
 //#include "tasks/bluetooth_server/ble_server.h"
-#include "tasks/led_strip/led_strip.h"
+
 #include "tasks/time_keeper/time_keeper.h"
 #include "tasks/deep_sleep/deep_sleep.h"
 #include "tasks/wifi_services/wifi_services.h"
@@ -34,13 +34,11 @@
 //*****************************************************         OBJECTS         *****************************************************/
 RTC_DATA_ATTR DeviceSettings device_settings;
 
- Terminal terminal;
+Terminal terminal;
 
 BluetoothLowEnergyServer bleServer;
 SPIFFS_Memory spiffsMemory;
 RealTimeClock rtc;
-Adafruit_NeoPixel led_strip(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
-Adafruit_LIS3DH accelerometer = Adafruit_LIS3DH();
 
 //*********************************************************       APP       *********************************************************/
 void monitorBattery();
@@ -50,20 +48,20 @@ void monitorBottlePosition();
 void BottleBirdApp::begin()
 {
     
-
-   
     Bottle_position bottle;
     Dummy_task_app dummy_task;
     App_events app_events;
-    Soc_task soc; 
+    Soc_task soc;
+    Leds_task leds;
 
+   
     soc.begin();
     terminal.begin(soc.get_serial_driver());
     app_events.begin();
+ 
+//    printf("Program started %s . %s . %s  %s\r\n",MAYOR_V,MINOR_V,MINOR_V, __DATE__);
 
-
-    printf("Program started\r\n");
-
+    leds.start_task(0);
     dummy_task.start_task(0);
     bottle.start_task(0);
     while(1);

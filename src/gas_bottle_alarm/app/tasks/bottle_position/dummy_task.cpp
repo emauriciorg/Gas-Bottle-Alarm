@@ -33,7 +33,7 @@ void Dummy_task_app::start_task(void *task_data){
                             APP_TASK_NAME,
                             10000,
                             this,
-                            22,
+                            5,
                             NULL,
                            xPortGetCoreID());
 }

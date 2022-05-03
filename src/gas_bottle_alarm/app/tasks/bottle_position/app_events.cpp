@@ -22,5 +22,5 @@ const int 	   led_msg_queue_len = 5;     // Size of msg_queue
 
 void  App_events::begin(void){
 	msg_queue = xQueueCreate(msg_queue_len, sizeof(app_events_t));
-	led_msg = xQueueCreate(led_msg_queue_len, sizeof(led_events_t));
+	led_msg   = xQueueCreate(led_msg_queue_len, sizeof(led_events_t));
 }

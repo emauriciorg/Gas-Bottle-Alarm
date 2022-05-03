@@ -11,8 +11,10 @@
 
 #define MINIMUM_BAT_VOLTAGE_FOR_BOOT_mV 3000
 
-//#define NUMPIXELS 12
-#define LED_BLINKING_PERIOD_mS 15
+
+#define MAYOR_V 1
+#define MINOR_V 0
+#define MINOR_V 0
 
 //*********************************************************     READ ME    **********************************************************/
 
@@ -23,14 +25,12 @@
 #include "../device/soc_settings.h"
 #include "../device/soc_pinout.h"
 
-#include <Adafruit_NeoPixel.h>
 
 //*****************************************************         OBJECTS         *****************************************************/
 extern SystemOnChip esp;
 extern Terminal terminal;
 extern BluetoothLowEnergyServer bleServer;
 extern SPIFFS_Memory spiffsMemory;
-extern Adafruit_NeoPixel led_strip;
 extern RealTimeClock rtc;
 
 //*****************************************************       DATA TYPES        *****************************************************/

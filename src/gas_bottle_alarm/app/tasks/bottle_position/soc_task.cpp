@@ -31,9 +31,9 @@ Soc_task::Soc_task(void) {
 void Soc_task::start_task(void *task_data){
      ::xTaskCreatePinnedToCore(soft_thread,
                             APP_TASK_NAME,
-                            10000,
+                            1000,
                             this,
-                            22,
+                            1,
                             NULL,
                            xPortGetCoreID());
 }
@@ -65,10 +65,7 @@ void Soc_task::soft_thread(void *ptask_instance) {
 	while (1){
 
 		vTaskDelay(500/portTICK_PERIOD_MS);
-		events.soft_delay++;
-		if (xQueueSend(msg_queue, (void *)&events, 10) != pdTRUE) {
-			printf("ERROR: Could not put item on delay queue.\r\n");
-		}
+	
     }	
 
 }

@@ -31,7 +31,7 @@ Leds_task::Leds_task(void) {
 void Leds_task::start_task(void *task_data){
 	 ::xTaskCreatePinnedToCore(soft_thread,
 							APP_TASK_NAME,
-							10000,
+							2*4096,
 							this,
 							22,
 							NULL,
@@ -41,13 +41,19 @@ void Leds_task::start_task(void *task_data){
 void Leds_task::begin(void) {
 
 	//* 1. Enabled LED's by driving LED GND pin
-//	pinMode(LED_GND_ENABLE, OUTPUT);
-//	digitalWrite(LED_GND_ENABLE, HIGH);
-  //  vTaskDelay(10 / portTICK_PERIOD_MS); // Allow some time to turn on
+	pinMode(LED_GND_ENABLE, OUTPUT);
+	digitalWrite(LED_GND_ENABLE, HIGH);
+  
 
-	//* 2. Begin & clear pixels
-	//led_strip.begin();
-//	led_strip.clear();
+
+// 	led_strip = Adafruit_NeoPixel(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+	
+// 	//* 2. Begin & clear pixels
+// 	vTaskDelay(10 / portTICK_PERIOD_MS); // Allow some time to turn on
+
+// 	led_strip.begin();
+// 	led_strip.clear();
+// 	led_strip.show();
    
 
 } 
@@ -59,42 +65,56 @@ void Leds_task::get_driver_event() {
 
 void Leds_task::soft_thread(void *ptask_instance) {
 
-	Leds_task* task_instance = (Leds_task*) ptask_instance;  
-	task_instance->begin();
-	
+	Leds_task* leds_task = (Leds_task*) ptask_instance;  	
 	//led_strip.show();
+	leds_task->begin();
+
+	Adafruit_NeoPixel led_strip(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+
+//	led_strip = Adafruit_NeoPixel(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 	
+	//* 2. Begin & clear pixels
+	vTaskDelay(10 / portTICK_PERIOD_MS); // Allow some time to turn on
+
+	led_strip.begin();
+	led_strip.clear();
+	led_strip.show();
 
 	uint8_t red;
 	uint8_t green;
 	uint8_t blue;
 	bool breath_in = true;
-	uint8_t brightness;
+	uint8_t brightness = 120;
 	uint8_t minimum_brightness = 40;
 	uint8_t maximum_brightness = 120;
 
 
-	led_events_t events;
-
-	while (1){
-
-		xQueueReceive(led_msg, (void *)&events, 2);
-
+	led_events_t events= {
+		.red = 1,
+		.green = 0,
+		.blue = 0
+	};
 
 	
-		red    = events.red  * brightness;
-		green  = events.green* brightness;
-		blue  =  events.blue * brightness;
-	
+	portMUX_TYPE myMutex = portMUX_INITIALIZER_UNLOCKED;
+		
+	 while (1){
+		xQueueReceive(led_msg, (void *)&events, 0);
+
+		red    = events.red   * brightness;
+		green  = events.green * brightness;
+		blue   = events.blue  * brightness;
+
+		led_strip.clear();
 		for (int i = 0; i < NUMPIXELS; i++)
 		{
-			//if (task_instance->led_table[i].red == false) continue;
-		
-	//		led_strip.setPixelColor(i, led_strip.Color(red, green, blue));
-//			led_strip.show();
-		 
+			led_strip.setPixelColor(i ,red, green, blue);
+			
 		}
-
+		led_strip.show();
+		
+			
+	
 		if (breath_in)
 		{
 			brightness = brightness + 4;
@@ -111,7 +131,7 @@ void Leds_task::soft_thread(void *ptask_instance) {
 				breath_in = true;
 		}
 
-	//	vTaskDelay(LED_BLINKING_PERIOD_mS / portTICK_PERIOD_MS);
+		vTaskDelay(15/portTICK_PERIOD_MS);
 	}	
 
 }
