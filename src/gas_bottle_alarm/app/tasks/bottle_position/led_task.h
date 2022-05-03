@@ -36,7 +36,7 @@ class Leds_task{
 
 	
 	public :
-		Adafruit_NeoPixel led_strip;
+//		Adafruit_NeoPixel led_strip; Causes error needs a pointer class
 		Leds_task(void);
 
 	//getters

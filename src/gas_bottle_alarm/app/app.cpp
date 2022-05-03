@@ -59,11 +59,15 @@ void BottleBirdApp::begin()
     terminal.begin(soc.get_serial_driver());
     app_events.begin();
  
-//    printf("Program started %s . %s . %s  %s\r\n",MAYOR_V,MINOR_V,MINOR_V, __DATE__);
+    printf("=======BOTTLE BIRD V%c.%c.%c  %s======\r\n",
+    MAYOR_V ,
+    MINOR_V ,
+    PATCH_V, __DATE__);
 
     leds.start_task(0);
     dummy_task.start_task(0);
     bottle.start_task(0);
+
     while(1);
    
 }

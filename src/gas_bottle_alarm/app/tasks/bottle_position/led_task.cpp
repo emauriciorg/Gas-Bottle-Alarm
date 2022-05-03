@@ -73,7 +73,7 @@ void Leds_task::soft_thread(void *ptask_instance) {
 
 //	led_strip = Adafruit_NeoPixel(NUMPIXELS, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 	
-	//* 2. Begin & clear pixels
+	
 	vTaskDelay(10 / portTICK_PERIOD_MS); // Allow some time to turn on
 
 	led_strip.begin();
@@ -131,7 +131,7 @@ void Leds_task::soft_thread(void *ptask_instance) {
 				breath_in = true;
 		}
 
-		vTaskDelay(15/portTICK_PERIOD_MS);
+		vTaskDelay(LED_BLINKING_PERIOD_mS/portTICK_PERIOD_MS);
 	}	
 
 }

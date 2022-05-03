@@ -12,9 +12,9 @@
 #define MINIMUM_BAT_VOLTAGE_FOR_BOOT_mV 3000
 
 
-#define MAYOR_V 1
-#define MINOR_V 0
-#define MINOR_V 0
+#define MAYOR_V '1'
+#define MINOR_V '0'
+#define PATCH_V '0'
 
 //*********************************************************     READ ME    **********************************************************/
 
